@@ -15,6 +15,14 @@ export default class Seat extends Model {
           },
         },
 
+        bus_id: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: { model: 'buses', key: 'id' },
+          onUpdate: 'CASCADE',
+          onDelete: 'CASCADE'
+        },
+
         status: {
           type: Sequelize.ENUM('available', 'reserved', 'sold'),
           defaultValue: 'available',
@@ -33,7 +41,7 @@ export default class Seat extends Model {
   }
 
   static associate(models) {
-    this.belongsTo(models.Schedule, { foreignKey: 'schedule_id' });
+    this.belongsTo(models.Schedule, { foreignKey: 'schedule_id', as: 'schedule' });
 
     this.hasOne(models.Ticket, { foreignKey: 'seat_id' });
   }

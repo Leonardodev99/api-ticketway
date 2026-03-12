@@ -13,7 +13,7 @@ export default {
 
       schedule_id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,  // antes era false
         references: {
           model: 'schedules',
           key: 'id',
