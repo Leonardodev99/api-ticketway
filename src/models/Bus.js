@@ -47,6 +47,17 @@ export default class Bus extends Model {
         company: {
           type: Sequelize.STRING,
           allowNull: false,
+          validate: {
+            len: {
+              args: [5, 150],
+              msg: 'A empresa deve ter entre 5 e 150 caracteres'
+            },
+            isNotStartWithNumber(value) {
+              if (/^\d/.test(value)) {
+                throw new Error('A empresa não pode começar com número');
+              }
+            }
+          }
         },
       },
       {
@@ -62,6 +73,14 @@ export default class Bus extends Model {
   }
 
   static associate(models) {
-    this.hasMany(models.Schedule, { foreignKey: 'bus_id' });
+    this.hasMany(models.Schedule, {
+      foreignKey: 'bus_id',
+      as: 'schedules'
+    });
+
+    this.hasMany(models.Seat, {
+      foreignKey: 'bus_id',
+      as: 'seats'
+    });
   }
 }

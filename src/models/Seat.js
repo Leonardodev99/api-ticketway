@@ -41,7 +41,15 @@ export default class Seat extends Model {
   }
 
   static associate(models) {
-    this.belongsTo(models.Schedule, { foreignKey: 'schedule_id', as: 'schedule' });
+    this.belongsTo(models.Schedule, {
+      foreignKey: 'schedule_id',
+      as: 'schedule'
+    });
+
+    this.belongsTo(models.Bus, {
+      foreignKey: 'bus_id',
+      as: 'bus'
+    });
 
     this.hasOne(models.Ticket, { foreignKey: 'seat_id' });
   }

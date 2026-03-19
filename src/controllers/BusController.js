@@ -1,7 +1,6 @@
 import Bus from '../models/Bus.js';
 import Seat from '../models/Seat.js';
 import Schedule from '../models/Schedule.js';
-import SeatGeneratorService from '../services/SeatGeneratorService.js';
 
 class BusController {
 
@@ -21,7 +20,7 @@ class BusController {
       const bus = await Bus.create(req.body);
 
       // Gera automaticamente os assentos
-      await SeatGeneratorService.generate(bus.id, total_seats);
+      //await SeatGeneratorService.generate(bus.id, total_seats);
 
       return res.status(201).json({
         message: 'Autocarro criado com sucesso com assentos gerados',
@@ -45,13 +44,13 @@ class BusController {
     try {
 
       const buses = await Bus.findAll({
-        attributes: ['id', 'name', 'plate_number', 'total_seats', 'createdAt']
+        attributes: ['id', 'model', 'plate_number', 'total_seats', 'created_at']
       });
 
       return res.json(buses);
 
     } catch (error) {
-
+      console.error(error);
       return res.status(500).json({
         error: 'Erro ao listar autocarros'
       });
@@ -73,11 +72,14 @@ class BusController {
       const bus = await Bus.findByPk(id, {
         include: [
           {
-            model: Seat,
+            association: 'seats',
             attributes: ['id', 'seat_number', 'status']
           },
           {
-            model: Schedule
+            association: 'schedules',
+            include: [
+              { association: 'route' }
+            ]
           }
         ]
       });
@@ -91,7 +93,7 @@ class BusController {
       return res.json(bus);
 
     } catch (error) {
-
+      console.error(error);
       return res.status(500).json({
         error: 'Erro ao buscar autocarro'
       });
@@ -142,7 +144,7 @@ class BusController {
       });
 
     } catch (error) {
-
+      console.error(error);
       return res.status(400).json({
         errors: error.errors?.map(err => err.message)
       });
@@ -176,7 +178,7 @@ class BusController {
       });
 
     } catch (error) {
-
+      console.error(error);
       return res.status(500).json({
         error: 'Erro ao remover autocarro'
       });

@@ -23,6 +23,13 @@ export default class Schedule extends Model {
             },
           },
         },
+        bus_id: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: { model: 'buses', key: 'id' },
+          onUpdate: 'CASCADE',
+          onDelete: 'CASCADE'
+        },
       },
       {
         sequelize,
@@ -37,8 +44,8 @@ export default class Schedule extends Model {
   }
 
   static associate(models) {
-    this.belongsTo(models.Route, { foreignKey: 'route_id' });
-    this.belongsTo(models.Bus, { foreignKey: 'bus_id' });
+    this.belongsTo(models.Route, { foreignKey: 'route_id', as: 'route'});
+    this.belongsTo(models.Bus, { foreignKey: 'bus_id', as: 'bus' });
 
     this.hasMany(models.Seat, { foreignKey: 'schedule_id', as: 'seats' });
     this.hasMany(models.Ticket, { foreignKey: 'schedule_id' });
