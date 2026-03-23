@@ -22,6 +22,13 @@ export default class Seat extends Model {
           onUpdate: 'CASCADE',
           onDelete: 'CASCADE'
         },
+        schedule_id: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+          references: { model: 'schedules', key: 'id' },
+          onUpdate: 'CASCADE',
+          onDelete: 'CASCADE'
+        },
 
         status: {
           type: Sequelize.ENUM('available', 'reserved', 'sold'),

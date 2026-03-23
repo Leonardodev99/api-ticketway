@@ -29,6 +29,21 @@ export default class Ticket extends Model {
           type: Sequelize.ENUM('pending', 'paid', 'cancelled'),
           defaultValue: 'pending',
         },
+
+        expires_at: {
+          type: Sequelize.DATE,
+          allowNull: true,
+          validate: {
+            isDate: {
+              msg: 'Data de expiração inválida'
+            },
+            isAfterPurchase(value) {
+              if (value && value <= this.purchase_date) {
+                throw new Error('Data de expiração deve ser futura');
+              }
+            }
+          }
+        }
       },
       {
         sequelize,
@@ -45,9 +60,16 @@ export default class Ticket extends Model {
   static associate(models) {
     this.belongsTo(models.User, { foreignKey: 'user_id' });
 
-    this.belongsTo(models.Schedule, { foreignKey: 'schedule_id' });
+    this.belongsTo(models.Schedule, {
+      foreignKey: 'schedule_id',
+      as: 'schedule'
+    });
 
-    this.belongsTo(models.Seat, { foreignKey: 'seat_id' });
+    this.belongsTo(models.Seat, {
+      foreignKey: 'seat_id',
+      as: 'seat'
+    });
+
 
     this.hasOne(models.Payment, { foreignKey: 'ticket_id' });
   }

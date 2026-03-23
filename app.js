@@ -10,6 +10,7 @@ import userRoutes from './src/routes/userRoutes';
 import busRoutes from './src/routes/busRoutes.js';
 import routeRoutes from './src/routes/routeRoutes.js';
 import scheduleRoutes from './src/routes/scheduleRoutes.js';
+import ticketRoutes from './src/routes/ticketRoutes.js';
 
 
 
@@ -30,6 +31,7 @@ class App {
     this.app.use('/buses', busRoutes);
     this.app.use('/routes', routeRoutes);
     this.app.use('/schedules', scheduleRoutes);
+    this.app.use('/tickets', ticketRoutes);
   }
 }
 

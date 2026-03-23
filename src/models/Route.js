@@ -50,5 +50,7 @@ export default class Route extends Model {
 
   static associate(models) {
     this.hasMany(models.Schedule, { foreignKey: 'route_id', as: 'route' });
+    this.hasMany(models.Schedule, { foreignKey: 'route_id', as: 'schedules' });
+
   }
 }
