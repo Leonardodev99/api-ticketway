@@ -231,7 +231,6 @@ class TicketController {
     try {
       const { schedule_id, seat_id, user_id } = req.body;
 
-      // 🔍 Buscar schedule + rota
       const schedule = await Schedule.findByPk(schedule_id, {
         include: { model: Route, as: 'route' },
         transaction
@@ -242,7 +241,6 @@ class TicketController {
         return res.status(404).json({ error: 'Viagem não encontrada' });
       }
 
-      // 🔍 Buscar assento
       const seat = await Seat.findOne({
         where: { id: seat_id, schedule_id },
         transaction
@@ -250,27 +248,23 @@ class TicketController {
 
       if (!seat) {
         await transaction.rollback();
-        return res.status(404).json({
-          error: 'Assento não encontrado'
-        });
+        return res.status(404).json({ error: 'Assento não encontrado' });
       }
 
-      // 🚫 Verifica disponibilidade
       if (seat.status !== 'available') {
         await transaction.rollback();
-        return res.status(400).json({
-          error: 'Assento indisponível'
-        });
+        return res.status(400).json({ error: 'Assento indisponível' });
       }
 
-      // 💰 Preço da rota
       const ticketPrice = parseFloat(schedule.route.price);
 
-      // ⏳ Expiração em 24h
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24);
 
-      // 🎟 Criar ticket como PENDING
+      // 🔥 MULTICAIXA
+      const entity = '12345';
+      const reference = Math.floor(100000000 + Math.random() * 900000000).toString();
+
       const ticket = await Ticket.create({
         schedule_id,
         seat_id,
@@ -278,20 +272,24 @@ class TicketController {
         price: ticketPrice,
         purchase_date: new Date(),
         status: 'pending',
-        expires_at: expiresAt
+        expires_at: expiresAt,
+        entity,
+        reference
       }, { transaction });
 
-      // 🔒 Bloquear assento temporariamente
-      await seat.update({
-        status: 'reserved'
-      }, { transaction });
+      await seat.update({ status: 'reserved' }, { transaction });
 
       await transaction.commit();
 
       return res.status(201).json({
-        message: 'Assento reservado por 24h',
-        ticket,
-        expires_at: expiresAt
+        message: 'Reserva criada. Faça o pagamento via Multicaixa',
+        pagamento: {
+          entidade: entity,
+          referencia: reference,
+          valor: ticketPrice
+        },
+        expires_at: expiresAt,
+        ticket
       });
 
     } catch (error) {
@@ -304,21 +302,24 @@ class TicketController {
     }
   }
 
+
   //MÉTODO: CONFIRMAR PAGAMENTO
   async pay(req, res) {
     const transaction = await Ticket.sequelize.transaction();
 
     try {
-      const { id } = req.params;
+      const { reference_code } = req.body;
 
-      const ticket = await Ticket.findByPk(id, { transaction });
+      const ticket = await Ticket.findOne({
+        where: { reference_code },
+        transaction
+      });
 
       if (!ticket) {
         await transaction.rollback();
         return res.status(404).json({ error: 'Bilhete não encontrado' });
       }
 
-      // ⏰ Verifica expiração
       if (ticket.expires_at && new Date() > ticket.expires_at) {
         await transaction.rollback();
         return res.status(400).json({
@@ -326,13 +327,11 @@ class TicketController {
         });
       }
 
-      // 🔄 Atualiza ticket
       await ticket.update({
         status: 'paid',
         expires_at: null
       }, { transaction });
 
-      // 💺 Atualiza assento
       const seat = await Seat.findByPk(ticket.seat_id, { transaction });
 
       if (seat) {
@@ -343,6 +342,7 @@ class TicketController {
 
       return res.json({
         message: 'Pagamento confirmado',
+        reference_code,
         ticket
       });
 

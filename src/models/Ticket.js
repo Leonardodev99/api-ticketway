@@ -29,6 +29,15 @@ export default class Ticket extends Model {
           type: Sequelize.ENUM('pending', 'paid', 'cancelled'),
           defaultValue: 'pending',
         },
+        reference_code: {
+          type: Sequelize.STRING,
+          allowNull: true,
+          unique: true,
+        },
+        entity: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
 
         expires_at: {
           type: Sequelize.DATE,
