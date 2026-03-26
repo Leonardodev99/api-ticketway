@@ -11,6 +11,7 @@ import busRoutes from './src/routes/busRoutes.js';
 import routeRoutes from './src/routes/routeRoutes.js';
 import scheduleRoutes from './src/routes/scheduleRoutes.js';
 import ticketRoutes from './src/routes/ticketRoutes.js';
+import paymentRoutes from './src/routes/paymentRoutes.js';
 
 
 
@@ -32,6 +33,7 @@ class App {
     this.app.use('/routes', routeRoutes);
     this.app.use('/schedules', scheduleRoutes);
     this.app.use('/tickets', ticketRoutes);
+    this.app.use('/payments', paymentRoutes);
   }
 }
 

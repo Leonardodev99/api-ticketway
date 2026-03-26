@@ -274,7 +274,7 @@ class TicketController {
         status: 'pending',
         expires_at: expiresAt,
         entity,
-        reference
+        reference_code: reference
       }, { transaction });
 
       await seat.update({ status: 'reserved' }, { transaction });
