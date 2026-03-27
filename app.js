@@ -12,6 +12,7 @@ import routeRoutes from './src/routes/routeRoutes.js';
 import scheduleRoutes from './src/routes/scheduleRoutes.js';
 import ticketRoutes from './src/routes/ticketRoutes.js';
 import paymentRoutes from './src/routes/paymentRoutes.js';
+import reportRoutes from './src/routes/reportRoutes.js';
 
 
 
@@ -34,6 +35,7 @@ class App {
     this.app.use('/schedules', scheduleRoutes);
     this.app.use('/tickets', ticketRoutes);
     this.app.use('/payments', paymentRoutes);
+    this.app.use('/reports', reportRoutes);
   }
 }
 
