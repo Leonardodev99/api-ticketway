@@ -50,6 +50,11 @@ export default class User extends Model {
           allowNull: false,
         },
 
+        avatar: {
+          type: Sequelize.STRING,
+          allowNull: true,
+        },
+
         role: {
           type: Sequelize.ENUM('user', 'admin'),
           defaultValue: 'user',

@@ -119,6 +119,41 @@ class UserController {
     }
   }
 
+  async uploadAvatar(req, res) {
+    try {
+      const { id } = req.params;
+
+      const user = await User.findByPk(id);
+
+      if (!user) {
+        return res.status(404).json({
+          error: 'Usuário não encontrado'
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          error: 'Nenhum ficheiro enviado'
+        });
+      }
+
+      user.avatar = req.file.filename;
+
+      await user.save();
+
+      return res.json({
+        message: 'Avatar atualizado com sucesso',
+        avatar: user.avatar
+      });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        error: 'Erro ao fazer upload'
+      });
+    }
+  }
+
 
   // Excluir usuário
   async delete(req, res) {
