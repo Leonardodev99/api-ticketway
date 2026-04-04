@@ -15,6 +15,7 @@ import ticketRoutes from './src/routes/ticketRoutes.js';
 import paymentRoutes from './src/routes/paymentRoutes.js';
 import reportRoutes from './src/routes/reportRoutes.js';
 import tokenRoutes from './src/routes/tokenRoutes.js';
+import passwordResetRoutes from './src/routes/passwordResetRoutes';
 
 
 
@@ -40,6 +41,7 @@ class App {
     this.app.use('/payments', paymentRoutes);
     this.app.use('/reports', reportRoutes);
     this.app.use('/tokens', tokenRoutes);
+    this.app.use('/password', passwordResetRoutes);
   }
 }
 
