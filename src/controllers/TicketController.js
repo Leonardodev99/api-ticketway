@@ -15,7 +15,8 @@ class TicketController {
     const transaction = await Ticket.sequelize.transaction();
 
     try {
-      const { schedule_id, seat_id, user_id } = req.body;
+      const user_id = req.userId;
+      const { schedule_id, seat_id } = req.body;
 
       // 🔍 Buscar viagem + rota
       const schedule = await Schedule.findByPk(schedule_id, {
@@ -229,7 +230,8 @@ class TicketController {
     const transaction = await Ticket.sequelize.transaction();
 
     try {
-      const { schedule_id, seat_id, user_id } = req.body;
+      const user_id = req.userId;
+      const { schedule_id, seat_id } = req.body;
 
       const schedule = await Schedule.findByPk(schedule_id, {
         include: { model: Route, as: 'route' },
@@ -377,6 +379,88 @@ class TicketController {
     }
 
     console.log(`⏰ ${expiredTickets.length} reservas expiradas`);
+  }
+
+  async myTrips(req, res) {
+    try {
+
+      const userId = req.userId;
+
+      const tickets = await Ticket.findAll({
+        where: {
+          user_id: userId
+        },
+        include: [
+          {
+            association: 'seat',
+            attributes: ['seat_number', 'status']
+          },
+          {
+            association: 'schedule',
+            include: [
+              { association: 'route' },
+              { association: 'bus' }
+            ]
+          }
+        ],
+        order: [['created_at', 'DESC']]
+      });
+
+      return res.json({
+        success: true,
+        total: tickets.length,
+        trips: tickets
+      });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        error: 'Erro ao buscar suas viagens'
+      });
+    }
+  }
+
+
+  async myTripById(req, res) {
+    try {
+
+      const userId = req.userId;
+      const { id } = req.params;
+
+      const ticket = await Ticket.findOne({
+        where: {
+          id,
+          user_id: userId
+        },
+        include: [
+          {
+            association: 'seat',
+            attributes: ['seat_number', 'status']
+          },
+          {
+            association: 'schedule',
+            include: [
+              { association: 'route' },
+              { association: 'bus' }
+            ]
+          }
+        ]
+      });
+
+      if (!ticket) {
+        return res.status(404).json({
+          error: 'Viagem não encontrada ou não pertence a você'
+        });
+      }
+
+      return res.json(ticket);
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        error: 'Erro ao buscar viagem'
+      });
+    }
   }
 
 }

@@ -43,7 +43,7 @@ class UserController {
       return res.json(users);
 
     } catch (error) {
-
+      console.log(error);
       return res.status(500).json({
         error: 'Erro ao listar usuários'
       });
@@ -71,7 +71,7 @@ class UserController {
       return res.json(user);
 
     } catch (error) {
-
+      console.log(error);
       return res.status(500).json({
         error: 'Erro ao buscar usuário'
       });
@@ -84,9 +84,7 @@ class UserController {
   async update(req, res) {
     try {
 
-      const { id } = req.params;
-
-      const user = await User.findByPk(id);
+      const user = await User.findByPk(req.userId);
 
       if (!user) {
         return res.status(404).json({
@@ -94,36 +92,40 @@ class UserController {
         });
       }
 
-      const { name, email, password, role } = req.body;
+      const { name, email, password, avatar } = req.body;
+
+
 
       await user.update({
         name,
         email,
         password,
-        role
+        avatar
       });
+
+      const avatarUrl = user.avatar
+        ? `${process.env.APP_URL}/images/${user.avatar}`
+        : null;
 
       return res.json({
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        avatarUrl: avatar
       });
 
     } catch (error) {
-
       return res.status(400).json({
         errors: error.errors?.map(err => err.message) || [error.message]
       });
-
     }
   }
 
   async uploadAvatar(req, res) {
     try {
-      const { id } = req.params;
 
-      const user = await User.findByPk(id);
+      const user = await User.findByPk(req.userId);
 
       if (!user) {
         return res.status(404).json({
@@ -141,15 +143,50 @@ class UserController {
 
       await user.save();
 
+      const avatarUrl = `${process.env.APP_URL}/images/${user.avatar}`;
+
       return res.json({
         message: 'Avatar atualizado com sucesso',
-        avatar: user.avatar
+        avatar: avatarUrl
       });
 
     } catch (error) {
       console.error(error);
       return res.status(500).json({
         error: 'Erro ao fazer upload'
+      });
+    }
+  }
+
+  async profile(req, res) {
+    try {
+
+      const user = await User.findByPk(req.userId, {
+        attributes: ['id', 'name', 'email', 'role', 'avatar']
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          error: 'Usuário não encontrado'
+        });
+      }
+
+      const avatarUrl = user.avatar
+        ? `${process.env.APP_URL}/images/${user.avatar}`
+        : null;
+
+      return res.json({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: avatarUrl
+      });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        error: 'Erro ao buscar perfil'
       });
     }
   }
@@ -176,7 +213,7 @@ class UserController {
       });
 
     } catch (error) {
-
+      console.log(error);
       return res.status(500).json({
         error: 'Erro ao excluir usuário'
       });

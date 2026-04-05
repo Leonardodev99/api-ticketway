@@ -2,10 +2,6 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 class TokenController {
-  /**
-   * Login
-   * POST /tokens
-   */
   async store(req, res) {
     try {
       const { email, password } = req.body;
@@ -16,7 +12,6 @@ class TokenController {
         });
       }
 
-      // Verifica se usuário existe
       const user = await User.findOne({ where: { email } });
 
       if (!user) {
@@ -25,7 +20,6 @@ class TokenController {
         });
       }
 
-      // Verifica senha
       const passwordValid = await user.checkPassword(password);
 
       if (!passwordValid) {
@@ -34,12 +28,11 @@ class TokenController {
         });
       }
 
-      // 🔐 Gerar Token
       const token = jwt.sign(
         {
           id: user.id,
           email: user.email,
-          tipo: user.user_type // 👈 Perfil do usuário dentro do token
+          role: user.role // ✅ corrigido
         },
         process.env.TOKEN_SECRET,
         {
@@ -51,8 +44,9 @@ class TokenController {
         token,
         user: {
           id: user.id,
-          name: user.nome,
+          name: user.name, // ✅ corrigido
           email: user.email,
+          role: user.role
         }
       });
 

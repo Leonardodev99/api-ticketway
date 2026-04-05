@@ -1,14 +1,27 @@
 import { Router } from 'express';
 import UserController from '../controllers/UserController.js';
-import upload from '../middlewares/upload';
+import upload from '../middlewares/upload.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
+import roleMiddleware from '../middlewares/roleMiddleware.js';
 
 const router = new Router();
 
-router.post('/', UserController.store);
-router.post('/avatar/:id', upload.single('file'), UserController.uploadAvatar);
-router.get('/', UserController.index);
-router.get('/:id', UserController.show);
-router.put('/:id', UserController.update);
-router.delete('/:id', UserController.delete);
+// 🔓 Públicas
+router.post('/', UserController.store); // cadastro
+
+// 🔐 Protegidas
+router.use(authMiddleware);
+
+// 👤 Ver pirfil
+router.get('/me', UserController.profile);
+
+// 🛡️ Apenas admin
+router.get('/', roleMiddleware('admin'), UserController.index);
+router.get('/:id', roleMiddleware('admin'), UserController.show);
+router.delete('/:id', roleMiddleware('admin'), UserController.delete);
+
+// 👤 User ou Admin
+router.put('/me', UserController.update);
+router.post('/avatar', upload.single('file'), UserController.uploadAvatar);
 
 export default router;

@@ -1,10 +1,15 @@
 import { Router } from 'express';
 import PaymentController from '../controllers/PaymentController.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
+import roleMiddleware from '../middlewares/roleMiddleware.js';
 
 const routes = Router();
 
-routes.post('/pay', PaymentController.pay);
-routes.get('/:reference', PaymentController.getStatus);
-routes.post('/cancel', PaymentController.cancel);
+// 🔐 Protegidas
+routes.use(authMiddleware);
+
+routes.post('/pay', roleMiddleware('admin', 'user'), PaymentController.pay);
+routes.get('/:reference', roleMiddleware('admin', 'user'), PaymentController.getStatus);
+routes.post('/cancel', roleMiddleware('admin'), PaymentController.cancel);
 
 export default routes;
